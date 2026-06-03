@@ -156,6 +156,23 @@
   .my-target select.mt-status{background:var(--panel);border:1px solid var(--line);color:var(--film);font-family:'DM Mono';font-size:11px;padding:5px 8px;border-radius:6px;cursor:pointer}
   .my-target .mt-rm{background:none;border:none;color:var(--muted);font-family:'DM Mono';font-size:11px;cursor:pointer}
   .my-target .mt-rm:hover{color:var(--red)}
+  .planner{margin-top:12px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:rgba(224,178,80,.04)}
+  .planner .pl-head{padding:10px 12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:'DM Mono';font-size:12px;color:var(--film)}
+  .planner .pl-head b{color:var(--gold)}
+  .planner .pl-head:hover{background:rgba(224,178,80,.07)}
+  .planner .pl-tog{color:var(--muted);transition:.2s}
+  .planner.open .pl-tog{transform:rotate(180deg)}
+  .planner .pl-body{display:none;padding:6px 12px 14px}
+  .planner.open .pl-body{display:block}
+  .pm-row{display:flex;align-items:center;gap:10px;padding:6px 0;font-family:'DM Mono';font-size:12px;border-bottom:1px solid rgba(44,40,30,.5)}
+  .pm-row:last-of-type{border-bottom:none}
+  .pm-when{color:var(--muted);width:54px;flex-shrink:0}
+  .pm-lab{color:var(--film);flex:1}
+  .pm-tag{color:var(--muted);font-size:11px}
+  .pm-row.pm-next{color:var(--gold)}
+  .pm-row.pm-next .pm-when,.pm-row.pm-next .pm-lab,.pm-row.pm-next .pm-tag{color:var(--gold)}
+  .pm-row.pm-past{opacity:.4;text-decoration:line-through}
+  .pl-note{font-family:'DM Mono';font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:10px}
   .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
   @media(max-width:760px){.stat-row{grid-template-columns:1fr 1fr}}
   .stat{border:1px solid var(--line);border-radius:10px;padding:20px;background:var(--panel);text-align:center}
@@ -565,11 +582,28 @@ function renderTargets(){
     const catTag = t.cat?`<span class="mt-tag">${esc(t.cat)}</span>`:'';
     const linkBit = t.link?(/^https?:\/\//i.test(t.link)?`<a href="${esc(t.link)}" target="_blank" rel="noopener">listing ↗</a>`:esc(t.link)):'';
     const opts=STATUS.map(([v,l])=>`<option value="${v}" ${t.status===v?'selected':''}>${l}</option>`).join('');
+    const done=['submitted','accepted','rejected'].includes(t.status);
+    let planner='';
+    if(t.date && !done){
+      const ms=milestones(t.date);
+      const next=ms.find(m=>m.days>=0);
+      const rows2=ms.map(m=>{
+        const isNext=next&&m.label===next.label;
+        const cls=m.days<0?'pm-past':isNext?'pm-next':'';
+        const tag=m.days<0?'passed':m.days===0?'today':`${m.days}d`;
+        return `<div class="pm-row ${cls}"><span class="pm-when">${fmtShort(m.date)}</span><span class="pm-lab">${m.label}</span><span class="pm-tag">${tag}</span></div>`;
+      }).join('');
+      planner=`<div class="planner">
+        <div class="pl-head" onclick="this.parentElement.classList.toggle('open')"><span>🗓️ Work-backwards plan${next?` — next: <b>${esc(next.label)}</b> by ${fmtShort(next.date)}`:''}</span><span class="pl-tog">▾</span></div>
+        <div class="pl-body">${rows2}<button class="btn ghost" style="margin-top:12px;font-size:11px;padding:8px 14px" onclick="downloadICS(${i})">📲 Add deadline + milestones to my calendar</button><div class="pl-note">Adds events to your Samsung Calendar with reminders — that's what'll actually notify you. The plan assumes ~6 weeks lead time; adjust by shooting earlier if your deadline's tight.</div></div>
+      </div>`;
+    }
     return `<div class="my-target st-${t.status||'researching'}">
       <div class="mt-info">
         <b>${esc(t.name)}</b>
         <span class="mt-sub">${t.date?fmtDate(t.date):'no deadline set'}${linkBit?' · '+linkBit:''}</span>
         <div class="mt-tags">${feeTag}${catTag}</div>
+        ${planner}
       </div>
       <div class="mt-right">
         <span class="mt-cd ${urgent?'urgent':''}">${cd}</span>
@@ -578,6 +612,52 @@ function renderTargets(){
       </div>
     </div>`;
   }).join('');
+}
+/* Work-backwards milestones from a deadline (~6 week production runway). */
+function milestones(dateStr){
+  const d=new Date(dateStr+'T00:00:00');
+  const offset=(daysBefore)=>{ const x=new Date(d); x.setDate(x.getDate()-daysBefore); return x; };
+  const defs=[
+    {label:'Submit on FilmFreeway', daysBefore:0},
+    {label:'Final export done', daysBefore:3},
+    {label:'Edit / color / sound', daysBefore:10},
+    {label:'Finish shooting + pickups', daysBefore:17},
+    {label:'Shoot day(s)', daysBefore:24},
+    {label:'Lock script + shot list', daysBefore:35},
+    {label:'Idea locked, start prep', daysBefore:42},
+  ].map(m=>{ const dt=offset(m.daysBefore); return {label:m.label, date:dt, days:dayDiff(dt)}; });
+  return defs.reverse(); // earliest first
+}
+function dayDiff(dateObj){ const n=new Date(); n.setHours(0,0,0,0); const t=new Date(dateObj); t.setHours(0,0,0,0); return Math.round((t-n)/864e5); }
+function fmtShort(dateObj){ return dateObj.toLocaleDateString(undefined,{month:'short',day:'numeric'}); }
+function icsDate(dateObj){ const y=dateObj.getFullYear(),m=String(dateObj.getMonth()+1).padStart(2,'0'),d=String(dateObj.getDate()).padStart(2,'0'); return `${y}${m}${d}`; }
+function downloadICS(i){
+  const t=state.targets[i]; if(!t||!t.date) return;
+  const ms=milestones(t.date);
+  const stamp=new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  let ics='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//FrameOne//FilmSchool//EN\r\nCALSCALE:GREGORIAN\r\n';
+  ms.forEach((m,idx)=>{
+    const dt=icsDate(m.date);
+    const isDeadline=m.label.startsWith('Submit');
+    const title=isDeadline?`🎬 DEADLINE: ${t.name}`:`${t.name} — ${m.label}`;
+    ics+='BEGIN:VEVENT\r\n';
+    ics+=`UID:frameone-${i}-${idx}-${Date.now()}@frameone\r\n`;
+    ics+=`DTSTAMP:${stamp}\r\n`;
+    ics+=`DTSTART;VALUE=DATE:${dt}\r\n`;
+    ics+=`SUMMARY:${title}\r\n`;
+    ics+=`DESCRIPTION:Frame One milestone for ${t.name}.${t.link?' Listing: '+t.link:''}\r\n`;
+    // reminder: 1 day before, 9am
+    ics+='BEGIN:VALARM\r\nTRIGGER:-P1D\r\nACTION:DISPLAY\r\nDESCRIPTION:Reminder\r\nEND:VALARM\r\n';
+    ics+='END:VEVENT\r\n';
+  });
+  ics+='END:VCALENDAR\r\n';
+  const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`${t.name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()}-plan.ics`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast('Calendar file downloaded — open it to add to Samsung Calendar.');
 }
 function setFilter(f){ trackerFilter=f; renderTargets(); }
 async function setStatus(i,v){
