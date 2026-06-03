@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRAME ONE — Your Film School</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0e0d0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Frame One">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap');
+  :root{
+    --bg:#0e0d0b;--panel:#16140f;--panel2:#1d1a13;--ink:#f4ede0;--muted:#8a8270;--line:#2c281e;
+    --gold:#e0b250;--gold-dim:#a8843a;--red:#d2492f;--green:#7fa650;--blue:#5a8ba8;--film:#c9bfa6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:'Fraunces',serif;-webkit-font-smoothing:antialiased}
+  body{background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0 1px,transparent 1px 3px),radial-gradient(circle at 80% -10%,rgba(224,178,80,.06),transparent 50%);min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+  .mono{font-family:'DM Mono',monospace}
+  header{border-bottom:1px solid var(--line);padding:18px 26px;padding-top:calc(18px + env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;background:rgba(14,13,11,.86);backdrop-filter:blur(10px)}
+  .brand{display:flex;align-items:baseline;gap:14px}
+  .brand h1{font-family:'Bebas Neue';font-size:34px;letter-spacing:.06em;line-height:1}
+  .brand .perf{color:var(--gold);font-size:34px;font-family:'Bebas Neue'}
+  .brand small{color:var(--muted);font-family:'DM Mono';font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .hstat{display:flex;align-items:center;gap:14px}
+  .syncdot{width:9px;height:9px;border-radius:50%;background:var(--muted);transition:.3s}
+  .syncdot.ok{background:var(--green);box-shadow:0 0 8px rgba(127,166,80,.6)}
+  .syncdot.local{background:var(--gold)}
+  .syncdot.err{background:var(--red)}
+  .streak{display:flex;align-items:center;gap:8px;font-family:'DM Mono';font-size:13px;color:var(--muted)}
+  .streak b{color:var(--gold);font-size:20px}
+  nav{display:flex;gap:4px;padding:0 26px;border-bottom:1px solid var(--line);background:var(--panel);overflow-x:auto}
+  nav button{background:none;border:none;color:var(--muted);font-family:'DM Mono';font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:15px 18px;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
+  nav button:hover{color:var(--ink)}
+  nav button.active{color:var(--gold);border-bottom-color:var(--gold)}
+  main{max-width:1080px;margin:0 auto;padding:34px 26px 90px}
+  .view{display:none;animation:fade .4s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .section-head{font-family:'Bebas Neue';font-size:15px;letter-spacing:.22em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+  .section-head::after{content:"";flex:1;height:1px;background:var(--line)}
+  .now{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:14px;padding:30px;margin-bottom:30px;position:relative;overflow:hidden}
+  .now::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 38px,rgba(224,178,80,.04) 38px 40px);pointer-events:none}
+  .now .tag{font-family:'DM Mono';font-size:11px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase}
+  .now h2{font-family:'Fraunces';font-weight:600;font-size:30px;margin:8px 0 6px;line-height:1.15}
+  .now .phase{font-family:'DM Mono';font-size:12px;color:var(--muted);margin-bottom:18px}
+  .now p{color:var(--film);max-width:62ch;line-height:1.55;font-size:16px}
+  .countdown{display:inline-flex;align-items:center;gap:8px;margin-top:20px;padding:8px 14px;border:1px solid var(--line);border-radius:30px;font-family:'DM Mono';font-size:13px}
+  .countdown b{color:var(--gold)}
+  .lesson-block{margin-top:24px;padding-top:22px;border-top:1px dashed var(--line)}
+  .lesson-block h3{font-family:'DM Mono';font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  ul.tasks{list-style:none;display:flex;flex-direction:column;gap:9px}
+  ul.tasks li{display:flex;gap:12px;align-items:flex-start;line-height:1.5;color:var(--film)}
+  ul.tasks li .dot{color:var(--gold);font-family:'DM Mono';flex-shrink:0}
+  .deliverable{margin-top:24px;background:rgba(210,73,47,.07);border:1px solid rgba(210,73,47,.3);border-radius:10px;padding:18px 20px}
+  .deliverable .lab{font-family:'DM Mono';font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--red);margin-bottom:8px}
+  .deliverable p{font-size:15px;color:var(--ink)}
+  .gearcall{margin-top:22px;background:rgba(90,139,168,.08);border:1px solid rgba(90,139,168,.35);border-radius:10px;padding:18px 20px;position:relative}
+  .gearcall .gc-lab{font-family:'DM Mono';font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--blue);margin-bottom:8px}
+  .gearcall p{font-size:14.5px;color:var(--film);line-height:1.6}
+  .gearcall p b{color:var(--ink)}
+  .gearcall .gc-edit{margin-top:12px;background:none;border:none;color:var(--blue);font-family:'DM Mono';font-size:11px;cursor:pointer;padding:0;letter-spacing:.04em}
+  .gearcall .gc-edit:hover{text-decoration:underline}
+  .gear-form{max-width:560px}
+  .gear-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+  @media(max-width:560px){.gear-row{grid-template-columns:1fr}}
+  .gear-form label{font-family:'DM Mono';font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+  .gear-form input,.gear-form select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--ink);font-family:'DM Mono';font-size:13px;padding:11px 14px;border-radius:8px}
+  .gear-form input:focus,.gear-form select:focus{outline:none;border-color:var(--gold-dim)}
+  .gear-preview{margin-top:20px;padding:16px 18px;border:1px dashed var(--line);border-radius:10px;color:var(--film);font-family:'DM Mono';font-size:13px;line-height:1.6}
+  .gear-preview b{color:var(--gold)}
+  .actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+  button.btn{font-family:'DM Mono';font-size:13px;letter-spacing:.06em;padding:12px 22px;border-radius:8px;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--ink);transition:.18s}
+  button.btn:hover{border-color:var(--gold-dim);transform:translateY(-1px)}
+  button.btn.primary{background:var(--gold);color:#1a1505;border-color:var(--gold);font-weight:500}
+  button.btn.primary:hover{background:#f0c468}
+  button.btn.ghost{background:none}
+  button.btn.danger:hover{border-color:var(--red);color:var(--red)}
+  .phase-card{border:1px solid var(--line);border-radius:12px;margin-bottom:16px;overflow:hidden;background:var(--panel)}
+  .phase-card .ph-head{padding:18px 22px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:.15s}
+  .phase-card .ph-head:hover{background:var(--panel2)}
+  .ph-head .ph-num{font-family:'Bebas Neue';font-size:42px;color:var(--gold-dim);line-height:.8;width:54px}
+  .ph-head .ph-info h4{font-family:'Fraunces';font-weight:600;font-size:20px}
+  .ph-head .ph-info span{font-family:'DM Mono';font-size:11px;color:var(--muted);letter-spacing:.1em}
+  .ph-head .ph-prog{font-family:'DM Mono';font-size:12px;color:var(--muted)}
+  .weeks{display:none;border-top:1px solid var(--line)}
+  .weeks.open{display:block}
+  .wk{padding:14px 22px 14px 76px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px;transition:.15s}
+  .wk:last-child{border-bottom:none}
+  .wk:hover{background:var(--panel2)}
+  .wk .wk-t{font-size:15px;color:var(--film)}
+  .wk .wk-t b{display:block;font-family:'DM Mono';font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
+  .wk.done .wk-t{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--gold-dim)}
+  .chip{font-family:'DM Mono';font-size:10px;padding:4px 9px;border-radius:20px;letter-spacing:.08em;white-space:nowrap}
+  .chip.done{background:rgba(127,166,80,.15);color:var(--green);border:1px solid rgba(127,166,80,.3)}
+  .chip.current{background:rgba(224,178,80,.15);color:var(--gold);border:1px solid rgba(224,178,80,.35)}
+  .chip.locked{background:none;color:var(--muted);border:1px solid var(--line)}
+  .wk button.jump{font-family:'DM Mono';font-size:11px;background:none;border:1px solid var(--line);color:var(--muted);padding:6px 12px;border-radius:6px;cursor:pointer;transition:.15s}
+  .wk button.jump:hover{border-color:var(--gold-dim);color:var(--gold)}
+  .fest-intro{color:var(--film);line-height:1.6;max-width:64ch;margin-bottom:24px;font-size:15px}
+  .fest-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:760px){.fest-grid{grid-template-columns:1fr}}
+  .fest{border:1px solid var(--line);border-radius:10px;padding:18px;background:var(--panel);position:relative}
+  .fest h5{font-family:'Fraunces';font-weight:600;font-size:18px;margin-bottom:4px}
+  .fest .meta{font-family:'DM Mono';font-size:11px;color:var(--muted);margin-bottom:10px;letter-spacing:.04em}
+  .fest .desc{font-size:13px;color:var(--film);line-height:1.5;margin-bottom:12px}
+  .fest .ddl{font-family:'DM Mono';font-size:12px;color:var(--gold)}
+  .fest a{color:var(--blue);font-family:'DM Mono';font-size:12px;text-decoration:none;border-bottom:1px solid transparent;transition:.15s}
+  .fest a:hover{border-bottom-color:var(--blue)}
+  .fest .tier{position:absolute;top:14px;right:14px;font-family:'DM Mono';font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:3px 8px;border-radius:4px}
+  .tier.entry{background:rgba(127,166,80,.14);color:var(--green)}
+  .tier.mid{background:rgba(90,139,168,.14);color:var(--blue)}
+  .tier.reach{background:rgba(210,73,47,.14);color:var(--red)}
+  .target-add{display:flex;gap:10px;margin:18px 0 26px;flex-wrap:wrap}
+  .target-add input{flex:1;min-width:160px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);font-family:'DM Mono';font-size:13px;padding:11px 14px;border-radius:8px}
+  .target-add input:focus{outline:none;border-color:var(--gold-dim)}
+  .my-target{display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:14px 18px;margin-bottom:10px}
+  .my-target .mt-info b{font-family:'Fraunces';font-weight:600;font-size:16px}
+  .my-target .mt-info span{font-family:'DM Mono';font-size:12px;color:var(--muted);display:block;margin-top:3px}
+  .my-target .mt-cd{font-family:'DM Mono';font-size:13px;color:var(--gold);white-space:nowrap}
+  .my-target .mt-cd.urgent{color:var(--red)}
+  .quicklinks{display:flex;flex-wrap:wrap;gap:10px}
+  .quicklinks a{font-family:'DM Mono';font-size:12px;color:var(--blue);text-decoration:none;border:1px solid var(--line);padding:9px 14px;border-radius:30px;transition:.15s}
+  .quicklinks a:hover{border-color:var(--blue);background:rgba(90,139,168,.08)}
+  .tracker-add{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:8px}
+  .ta-row{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+  .ta-row>div{flex:1;min-width:120px}
+  .ta-row .ta-grow{flex:2}
+  .tracker-add label{font-family:'DM Mono';font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+  .tracker-add input,.tracker-add select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--ink);font-family:'DM Mono';font-size:13px;padding:10px 12px;border-radius:8px}
+  .tracker-add input:focus,.tracker-add select:focus{outline:none;border-color:var(--gold-dim)}
+  .tracker-controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:22px 0 14px}
+  .tracker-controls .tc-filter{display:flex;gap:6px;flex-wrap:wrap}
+  .tracker-controls .tc-filter button{font-family:'DM Mono';font-size:11px;background:none;border:1px solid var(--line);color:var(--muted);padding:6px 12px;border-radius:20px;cursor:pointer;transition:.15s}
+  .tracker-controls .tc-filter button:hover{color:var(--ink)}
+  .tracker-controls .tc-filter button.on{border-color:var(--gold);color:var(--gold);background:rgba(224,178,80,.1)}
+  .tracker-controls .tc-total{margin-left:auto;font-family:'DM Mono';font-size:12px;color:var(--muted)}
+  .tracker-controls .tc-total b{color:var(--gold)}
+  .my-target{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:15px 18px;margin-bottom:10px}
+  .my-target.st-submitted{border-left-color:var(--blue)}
+  .my-target.st-accepted{border-left-color:var(--green)}
+  .my-target.st-rejected{border-left-color:var(--muted);opacity:.7}
+  .my-target .mt-info b{font-family:'Fraunces';font-weight:600;font-size:16px}
+  .my-target .mt-info .mt-sub{font-family:'DM Mono';font-size:12px;color:var(--muted);display:block;margin-top:4px;line-height:1.5}
+  .my-target .mt-info .mt-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .mt-tag{font-family:'DM Mono';font-size:10px;padding:3px 8px;border-radius:20px;border:1px solid var(--line);color:var(--film)}
+  .mt-tag.free{color:var(--green);border-color:rgba(127,166,80,.4)}
+  .mt-info a{color:var(--blue);text-decoration:none;font-family:'DM Mono';font-size:11px;border-bottom:1px solid transparent}
+  .mt-info a:hover{border-bottom-color:var(--blue)}
+  .my-target .mt-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;white-space:nowrap}
+  .my-target .mt-cd{font-family:'DM Mono';font-size:13px;color:var(--gold)}
+  .my-target .mt-cd.urgent{color:var(--red)}
+  .my-target select.mt-status{background:var(--panel);border:1px solid var(--line);color:var(--film);font-family:'DM Mono';font-size:11px;padding:5px 8px;border-radius:6px;cursor:pointer}
+  .my-target .mt-rm{background:none;border:none;color:var(--muted);font-family:'DM Mono';font-size:11px;cursor:pointer}
+  .my-target .mt-rm:hover{color:var(--red)}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+  @media(max-width:760px){.stat-row{grid-template-columns:1fr 1fr}}
+  .stat{border:1px solid var(--line);border-radius:10px;padding:20px;background:var(--panel);text-align:center}
+  .stat .n{font-family:'Bebas Neue';font-size:46px;color:var(--gold);line-height:.9}
+  .stat .l{font-family:'DM Mono';font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+  .logitem{border-left:2px solid var(--gold-dim);padding:10px 0 10px 18px;margin-left:6px;position:relative}
+  .logitem::before{content:"";position:absolute;left:-5px;top:16px;width:8px;height:8px;border-radius:50%;background:var(--gold)}
+  .logitem .lt{font-family:'DM Mono';font-size:11px;color:var(--muted);letter-spacing:.06em}
+  .logitem .lc{color:var(--film);margin-top:3px;line-height:1.4}
+  .empty{color:var(--muted);font-family:'DM Mono';font-size:13px;text-align:center;padding:40px;border:1px dashed var(--line);border-radius:10px}
+  .flex-note{margin-top:30px;padding:16px 20px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:13px;line-height:1.6;font-family:'DM Mono'}
+  .flex-note b{color:var(--gold-dim)}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--gold);color:#1a1505;font-family:'DM Mono';font-size:13px;padding:13px 24px;border-radius:30px;z-index:200;transition:.35s;opacity:0;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  .modal-bg{position:fixed;inset:0;background:rgba(8,7,5,.8);backdrop-filter:blur(4px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+  .modal-bg.show{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px;max-width:460px;width:100%;max-height:90vh;overflow:auto}
+  .modal h3{font-family:'Fraunces';font-weight:600;font-size:22px;margin-bottom:8px}
+  .modal p{color:var(--film);line-height:1.5;margin-bottom:16px;font-size:14px}
+  .modal textarea,.modal input{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--ink);font-family:'DM Mono';font-size:13px;padding:12px;border-radius:8px;margin-bottom:14px}
+  .modal textarea{resize:vertical;min-height:80px}
+  .modal textarea:focus,.modal input:focus{outline:none;border-color:var(--gold-dim)}
+  .modal label{font-family:'DM Mono';font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+  .setup-steps{font-family:'DM Mono';font-size:12px;color:var(--film);line-height:1.7;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:18px}
+  .setup-steps b{color:var(--gold)}
+  .installbar{display:none;align-items:center;justify-content:space-between;gap:12px;background:var(--panel2);border:1px solid var(--gold-dim);border-radius:10px;padding:12px 16px;margin-bottom:20px}
+  .installbar.show{display:flex}
+  .installbar span{font-family:'DM Mono';font-size:12px;color:var(--film)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><h1>FRAME<span class="perf">·</span>ONE</h1><small>your private film school</small></div>
+  <div class="hstat">
+    <div class="streak">SHIPPED <b id="streakN">0</b></div>
+    <div class="syncdot" id="syncDot" title="sync status" onclick="openConfig()"></div>
+  </div>
+</header>
+<nav>
+  <button class="active" data-v="now">This Week</button>
+  <button data-v="map">Curriculum</button>
+  <button data-v="fest">Festival Board</button>
+  <button data-v="gear">My Gear</button>
+  <button data-v="log">Progress Log</button>
+</nav>
+<main>
+  <section class="view active" id="now"></section>
+  <section class="view" id="map">
+    <div class="installbar" id="installBar"><span>📲 Install Frame One on this device for an app-like, fullscreen experience.</span><button class="btn primary" id="installBtn">Install</button></div>
+    <div class="section-head">The Path · 5 Phases · 20 Weeks</div>
+    <div id="phaseList"></div>
+    <div class="flex-note"><b>Built for how your brain works.</b> One task is "current" at a time — everything ahead stays locked. Miss a week? Hit <b>"Life happened — pause"</b> on the This Week tab and the deadline rolls forward, no penalty. The only streak that matters is weeks you actually shipped.</div>
+  </section>
+  <section class="view" id="fest">
+    <div class="section-head">Festival Board · Submission Tracker</div>
+    <p class="fest-intro">You find festivals on <b>FilmFreeway</b> and pin them here with their real deadline, fee, and category — copied straight off the listing so it's always accurate. Frame One does the rest: countdowns, sorting by what's due soonest, fee totals, and tracking each from <i>researching</i> to <i>submitted</i> to <i>result</i>. Use the quick-browse buttons to jump into pre-filtered searches.</p>
+
+    <div class="section-head" style="margin-top:6px">Quick Browse FilmFreeway</div>
+    <div class="quicklinks" id="quickLinks"></div>
+
+    <div class="section-head" style="margin-top:28px">Pin A Festival</div>
+    <div class="tracker-add">
+      <div class="ta-row">
+        <div class="ta-grow"><label>Festival name</label><input id="tName" placeholder="e.g. Local Shorts Fest"></div>
+        <div><label>Deadline</label><input id="tDate" type="date"></div>
+      </div>
+      <div class="ta-row">
+        <div><label>Entry fee ($)</label><input id="tFee" type="number" step="0.01" placeholder="0"></div>
+        <div><label>Category</label>
+          <select id="tCat"><option value="">— pick —</option><option>Short</option><option>Comedy short</option><option>Music video</option><option>Student/Emerging</option><option>Documentary</option><option>Other</option></select>
+        </div>
+        <div><label>Status</label>
+          <select id="tStatus"><option value="researching">Researching</option><option value="planned">Planning to submit</option><option value="submitted">Submitted</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option></select>
+        </div>
+      </div>
+      <div class="ta-row">
+        <div class="ta-grow"><label>FilmFreeway link / notes (optional)</label><input id="tLink" placeholder="paste the listing URL or a note"></div>
+      </div>
+      <button class="btn primary" onclick="addTarget()">Pin Festival</button>
+    </div>
+
+    <div class="tracker-controls" id="trackerControls"></div>
+    <div id="myTargets"></div>
+
+    <div class="section-head" style="margin-top:30px">Good Places To Start</div>
+    <div class="fest-grid" id="festGrid"></div>
+  </section>
+  <section class="view" id="gear">
+    <div class="section-head">My Gear</div>
+    <p class="fest-intro">Tell Frame One what you actually shoot on, and the weekly lessons add a <b>camera-specific callout</b> — the exact dial, menu, and setting for your body. Defaults are set to your Sony a6400 + one prime. The general lessons stay too, so it all still applies if you add gear later.</p>
+    <div class="gear-form">
+      <div class="gear-row">
+        <div><label>Camera body</label><input id="gBody" placeholder="Sony a6400"></div>
+        <div><label>Crop factor</label>
+          <select id="gCrop"><option value="1.5">APS-C (1.5× — a6400)</option><option value="1">Full-frame (1.0×)</option><option value="2">Micro 4/3 (2.0×)</option></select>
+        </div>
+      </div>
+      <div class="gear-row">
+        <div><label>Prime focal length (mm)</label><input id="gFocal" type="number" placeholder="35"></div>
+        <div><label>Max aperture (f/)</label><input id="gAp" type="number" step="0.1" placeholder="1.8"></div>
+      </div>
+      <div class="gear-row">
+        <div><label>Lens has stabilization (OSS)?</label><select id="gOSS"><option value="false">No</option><option value="true">Yes</option></select></div>
+        <div><label>Have an ND filter?</label><select id="gND"><option value="true">Yes</option><option value="false">No</option></select></div>
+      </div>
+      <button class="btn primary" onclick="saveGear()">Save Gear</button>
+      <div id="gearPreview" class="gear-preview"></div>
+    </div>
+  </section>
+  <section class="view" id="log">
+    <div class="section-head">The Record</div>
+    <div class="stat-row">
+      <div class="stat"><div class="n" id="sWeeks">0</div><div class="l">Weeks Shipped</div></div>
+      <div class="stat"><div class="n" id="sPct">0%</div><div class="l">Course Done</div></div>
+      <div class="stat"><div class="n" id="sFilms">0</div><div class="l">Things Filmed</div></div>
+      <div class="stat"><div class="n" id="sTargets">0</div><div class="l">Festival Targets</div></div>
+    </div>
+    <div class="section-head">Timeline</div>
+    <div id="logList"></div>
+  </section>
+</main>
+
+<!-- complete modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="mTitle"></h3>
+    <p id="mBody"></p>
+    <textarea id="mNote" placeholder="Optional: how it went, what you learned, what broke..."></textarea>
+    <div class="actions" style="margin-top:0">
+      <button class="btn primary" onclick="confirmComplete()">Mark Shipped →</button>
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- config / sync setup modal -->
+<div class="modal-bg" id="configBg">
+  <div class="modal">
+    <h3>Cross-Device Sync</h3>
+    <p>Paste your free Supabase keys here once, on each device, and your progress syncs everywhere. Leave blank to just use this device only.</p>
+    <div class="setup-steps">
+      <b>One-time setup (5 min):</b><br>
+      1. Make a free account at <b>supabase.com</b><br>
+      2. Create a new project (any name)<br>
+      3. In the SQL Editor, run the snippet from the README<br>
+      4. Go to <b>Project Settings → API</b><br>
+      5. Copy the <b>Project URL</b> and the <b>anon public</b> key below
+    </div>
+    <label>Supabase Project URL</label>
+    <input id="cfgUrl" placeholder="https://xxxxx.supabase.co">
+    <label>Supabase anon public key</label>
+    <input id="cfgKey" placeholder="eyJhbGci...">
+    <label>Your sync code (any phrase — use the SAME one on every device)</label>
+    <input id="cfgUser" placeholder="e.g. squid-film-2026">
+    <div class="actions" style="margin-top:0">
+      <button class="btn primary" onclick="saveConfig()">Save & Sync</button>
+      <button class="btn ghost" onclick="document.getElementById('configBg').classList.remove('show')">Later</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============ CURRICULUM ============ */
+const CURRICULUM=[
+ {phase:"Camera Literacy",sub:"Stop being scared of manual mode",weeks:[
+  {t:"Exposure Triangle, For Real",lessons:["Set your camera to full Manual and never leave it this phase.","Learn what ISO, aperture (f-stop), and shutter speed each do to the image — plus the 180° shutter rule for video (shutter ≈ 2× framerate).","Watch any 10-min 'exposure triangle for video' explainer + one on the 180-degree shutter rule."],deliver:"Shoot the SAME static object 6 times: 3 changing only aperture (shallow→deep), 3 changing only ISO (clean→noisy). Label each clip with its settings. Goal: SEE the difference."},
+  {t:"White Balance & Picture Profiles",lessons:["Manual white balance (Kelvin) vs auto — and why auto WB ruins edits.","Find out if your camera has a flat/log profile (S-Log, V-Log, etc.) and what it's for.","Expose using the histogram, not screen brightness."],deliver:"Film one 30-sec clip indoors under warm light and one outdoors, manually matching WB each time. Then shoot one deliberately WRONG so you own the mistake."},
+  {t:"Movement & Stability",lessons:["Handheld technique: bracing, breathing, the 'lean into it' walk. No gimbal needed.","The basic moves and when to use them: static lock-off, pan, tilt, push-in, whip pan.","Frame rates for motion: 24fps look vs 60fps slow-mo."],deliver:"A 45-sec 'one location' study: same small space, 4+ different camera moves. Cut it together loosely in Resolve."},
+  {t:"Resolve Bootcamp (you've never opened it)",lessons:["Import → timeline → basic cuts → export. Just the spine.","Color page: lift/gamma/gain, applying a LUT if you shot log.","Build a reusable project preset so setup friction never stops you again."],deliver:"Cut ALL footage from weeks 1–3 into a 60–90 sec 'reel' of your best frames with one music track. First real export. Needs to be FINISHED, not good."},
+ ]},
+ {phase:"Light",sub:"What separates 'phone video' from 'film'",weeks:[
+  {t:"Reading Light You Didn't Make",lessons:["Quality: hard vs soft, how distance + diffusion change it.","Direction: key, fill, back/rim and what each does to a face.","Color temperature in mixed-light rooms and why it fights you."],deliver:"Natural-light portrait: a friend (or you) near a window at 3 times of day OR 3 positions. Same subject, different mood. Note which you'd use for 'happy' vs 'ominous'."},
+  {t:"One Light Can Do Everything",lessons:["Your existing light as a single key — soft vs hard with what you own.","Negative fill (a dark surface) to add contrast — free and underrated.","'Motivated light': it should seem to come from something in the scene."],deliver:"One dialogue-free moment (reading, coffee, looking out a window) lit with ONE light + bounce/negative fill. Make it cinematic. ~30 sec."},
+  {t:"Interview / Two-Subject Setups",lessons:["Key + fill + separation. Where the eyes look.","Lighting two people in one frame without going flat.","Practical lights (lamps, TVs, phones) as in-frame sources."],deliver:"Film a 1-min 'interview' (ask a friend 3 questions) lit intentionally. Bonus: a B-roll cutaway. Your first multi-shot edited piece with a subject."},
+  {t:"Mood Lighting & The Music-Video Look",lessons:["Color gels / RGB / app-controlled color for stylized looks.","Low-key vs high-key. Practical color as character.","Build a 'lighting plan' before shooting so you're not improvising at 11pm."],deliver:"Pick a song you love. Shoot 30–45 sec of stylized lit footage cut to it — your first fake-music-video fragment. Pure vibe + light + rhythm."},
+ ]},
+ {phase:"The Language of Shots",sub:"From pointing the camera to telling a story",weeks:[
+  {t:"Shot Sizes & Coverage",lessons:["Wide / medium / close-up / insert and the job each does.","'Coverage': enough angles to edit freely.","The 180-degree rule (screen direction) and why breaking it disorients."],deliver:"Film a wordless action (making coffee, tying shoes) with full coverage: wide, medium, 2 close-ups, 1 insert. Edit into a clear 20–30 sec sequence."},
+  {t:"Composition & Framing",lessons:["Rule of thirds, headroom, lead room — and when to break them.","Foreground/background layering for depth. Leading lines.","Eyeline and where a subject's gaze sends the viewer."],deliver:"A '10 frames' challenge: 10 deliberately composed shots of ordinary things, each a different compositional idea. Export as a stitched clip."},
+  {t:"Editing Rhythm & Continuity",lessons:["Match cuts, cutting on action, J-cuts and L-cuts (audio leads/lags picture).","Pacing: shot length creates tension or calm.","Continuity: eyelines, screen direction, props matching across cuts."],deliver:"Re-edit your Week 9 coverage TWO ways — one fast/tense, one slow/calm — using J/L cuts. Same footage, two feelings."},
+  {t:"Sound — The Half You'll Forget",lessons:["Why bad audio kills good footage faster than the reverse.","Recording usable sound with what you have; value of a cheap external/lav mic.","Room tone, foley basics, layering ambience in Resolve's Fairlight page."],deliver:"Rebuild any earlier clip's audio: clean dialogue/room tone + 2 layered sound effects + a music bed. Hear the difference."},
+ ]},
+ {phase:"Make A Real Short",sub:"Everything you've learned, one complete film",weeks:[
+  {t:"Pre-Production",lessons:["Take/write a 1–3 page script. Break it into a shot list.","Make a schedule: what's shot when, what you need, who's involved.","Lock location + lighting plan BEFORE shoot day so you're not deciding live."],deliver:"A complete shot list + schedule + gear/light plan for a 2–4 min short you'll shoot in Weeks 14–15. Pick something tiny. Constraint is your friend."},
+  {t:"Production — Shoot Day 1",lessons:["Run your plan. Get coverage. Check focus + audio EVERY take before moving on.","Shoot more coverage than feels necessary.","Note best takes as you go so the edit isn't a maze."],deliver:"Footage for roughly the first half of your short, fully covered."},
+  {t:"Production — Finish + Pickups",lessons:["Shoot remaining scenes; grab pickups/inserts you're missing.","Clean room tone at every location (you WILL need it).","B-roll and cutaways for editing flexibility."],deliver:"All principal footage in the can. Back it up in two places before you celebrate."},
+  {t:"Post — Edit, Color, Sound, Export",lessons:["Assembly → tighten → color → sound mix → titles → final export.","Watch it cold (or with a friend); note what drags.","Export a proper deliverable: 1080p/4K, good bitrate."],deliver:"YOUR FIRST COMPLETE SHORT FILM. Title card, your name, finished export. The milestone the whole course was built for."},
+ ]},
+ {phase:"Release & Repeat",sub:"Become someone who finishes and shares, on a loop",weeks:[
+  {t:"Watch Like A Filmmaker",lessons:["Watch 3 award-winning shorts (Vimeo Staff Picks, Oscar-shortlisted, festival winners).","For each note ONE thing about light, ONE about shots, ONE about sound to steal.","Compare honestly to your own short — to find your next lesson, not to feel bad."],deliver:"A short written breakdown of what those films do that yours doesn't yet + 3 specific skills to target next."},
+  {t:"Submit To Something Real",lessons:["Make a FilmFreeway account. Find 2–3 low/free-fee festivals taking shorts now.","Prep assets: film file, a still or two, a 1-line logline, short synopsis.","Actually submit. Rejection is the price of being in the game."],deliver:"At least ONE real festival submission made and logged on your Festival Board. You are now a filmmaker who submits to festivals."},
+  {t:"Build Your Next Project",lessons:["Reflect: what was hardest? That's your next focused skill.","Scope project #2 to fix one weakness while staying small.","Pick a sustainable rhythm — one short every 4–8 weeks beats a burnout 'masterpiece'."],deliver:"A one-paragraph pitch + skill-focus for your second short, plus a target festival/deadline. The loop begins again."},
+  {t:"Your System, Going Forward",lessons:["Set a repeatable cycle: idea → plan → shoot → cut → release → reflect.","Lower friction: reusable Resolve preset, gear checklist, go-to lighting setup.","You don't need the course anymore — you need reps. Schedule the next one now."],deliver:"Write your own ongoing rule (e.g. 'one piece every 6 weeks, festival-targeted'). Pin a real date for project #2. Graduation = you run the system yourself."},
+ ]},
+];
+const FESTS=[
+ {n:"Local / city film festival",tier:"entry",meta:"Your town or nearest city",desc:"Search '[your city] film festival' + '[your state] short film'. The friendliest first submission, sometimes attendable in person — huge for nerve & exposure.",ddl:"Varies yearly",url:"https://filmfreeway.com/festivals"},
+ {n:"FilmFreeway (the hub)",tier:"entry",meta:"Submission platform",desc:"Where you actually submit to thousands of festivals. Free account. Filter by fee, category (short/student/no-budget), deadline. Start here.",ddl:"Make an account",url:"https://filmfreeway.com"},
+ {n:"Student / no-budget categories",tier:"entry",meta:"On most festivals",desc:"Tons of fests have 'student', 'emerging', or 'first-time filmmaker' categories — lower fees, friendlier judging. Filter for these.",ddl:"Varies",url:"https://filmfreeway.com/festivals"},
+ {n:"Vimeo Staff Picks",tier:"entry",meta:"Online showcase",desc:"Not a festival but THE place to study great shorts and get online exposure. Watching winners is half your Phase 5 homework.",ddl:"Submit anytime",url:"https://vimeo.com/channels/staffpicks"},
+ {n:"Regional shorts festivals",tier:"mid",meta:"State / regional",desc:"Once you've a finished short, regional fests are a realistic step up. Often themed — match your piece to the right one.",ddl:"Rolling / annual",url:"https://filmfreeway.com/festivals"},
+ {n:"Genre fests (horror/comedy/music video)",tier:"mid",meta:"Themed, worldwide",desc:"Comedy and music-video fests are perfect for what you want to make. Niche = less competition + an audience that gets it.",ddl:"Varies",url:"https://filmfreeway.com/festivals"},
+ {n:"Oscar-qualifying shorts fests",tier:"reach",meta:"International, competitive",desc:"Aspirational — study winners now, submit when your craft's there. Knowing they exist gives the climb a summit.",ddl:"Annual",url:"https://filmfreeway.com/festivals"},
+ {n:"Sundance / SXSW / Tribeca shorts",tier:"reach",meta:"Major international",desc:"The big leagues. Years away maybe — but their selections teach the ceiling of the form. Dream big, submit small first.",ddl:"Annual (fall/winter)",url:"https://filmfreeway.com"},
+];
+
+/* ============ GEAR (defaults to Squid's a6400 + one prime) ============ */
+const DEFAULT_GEAR={ body:"Sony a6400", crop:1.5, focal:35, aperture:1.8, hasOSS:false, nd:true };
+
+/* Per-week gear callouts, keyed by FLAT week index (0-based).
+   Templating: {f}=actual focal length, {ff}=effective FoV after crop,
+   {body}=camera name, {a}=max aperture. Weeks not listed have no camera-specific tip. */
+const GEAR_TIPS={
+ 0:{title:"On your {body}",body:"Full manual: press the <b>MENU/Mode dial → M</b>. The {body} has <b>two control dials</b> — the top dial and the rear wheel. Assign one to aperture, one to shutter (they default this way in M). <b>ISO</b> is on the right-side wheel (down press) or the <b>Fn</b> menu. Your prime opens to <b>f/{a}</b> — shoot wide-open for these tests to really see depth-of-field. Remember it's APS-C: your {f}mm frames like a <b>~{ff}mm</b> on full-frame."},
+ 1:{title:"WB & profiles on your {body}",body:"White balance lives in the <b>Fn</b> menu — set it to a Kelvin number, not Auto. For profiles: the {body} has <b>Picture Profiles PP1–PP10</b> (incl. S-Log2/3 and HLG) under MENU. Honest take for an 8-bit body like yours: <b>S-Log gets noisy unless you nail exposure</b> — for now use <b>PP-off</b> or <b>HLG (PP10)</b> for an easier, still-gradeable image. Toggle the <b>histogram</b> on by pressing <b>DISP</b> until it appears."},
+ 2:{title:"Movement on your {body}",body:"Important: the {body} has <b>NO in-body stabilization</b>. {oss} So handheld technique matters more — brace elbows in, exhale on the move, short controlled steps. Set <b>24p</b> in MENU → Record Setting for the cinematic look. Single prime = you 'zoom with your feet,' which is great training."},
+ 3:{title:"Footage from your {body} in Resolve",body:"Your {body} records <b>XAVC S (.mp4)</b> — drops straight into Resolve, no transcoding needed on your PC. If you shot HLG or S-Log, apply the matching <b>Color Space Transform</b> or a Sony LUT on the Color page to get a normal-looking image. Save this as your reusable project preset."},
+ 4:{title:"Light + your prime",body:"At <b>f/{a}</b> your prime makes lovely soft backgrounds — put your subject well in front of the background to maximize that window-lit falloff. Single focal length ({ff}mm-equivalent) means you'll <b>physically move</b> to reframe; use that to find the most flattering distance from your subject's face."},
+ 5:{title:"One light + your {body}",body:"Wide-open at <b>f/{a}</b> you'll gather lots of light, so a single small source goes far. Watch your <b>histogram (DISP)</b> so the highlight side doesn't clip. Use <b>focus peaking</b> (MENU → Peaking Display ON) since shallow depth-of-field at f/{a} is easy to miss-focus."},
+ 6:{title:"Interview setup on your {body}",body:"Turn on <b>Real-time Eye AF</b> — the {body}'s killer feature — so your subject stays tack-sharp at f/{a}. MENU → Face/Eye AF Set → ON, and set AF to <b>AF-C</b>. Your {ff}mm-equiv prime is a nice flattering interview length; just back up to frame two people."},
+ 7:{title:"Music-video look on your {body}",body:"For stylized color, shoot a flatter profile (HLG/PP10) so you have room to push colors hard in Resolve. At <b>24p</b> with a <b>1/50 shutter</b> you get natural motion blur for that music-video feel — your <b>ND filter</b> is what lets you keep f/{a} + 1/50 under bright light (see week 11)."},
+ 8:{title:"Coverage with a single prime",body:"With one {ff}mm-equiv lens, you get shot variety by <b>moving the camera</b>, not zooming: step back for your 'wide,' step in for 'medium,' get close for the CU, and right up for the insert. Lock <b>AF-C + Eye AF</b> so refocusing between sizes is instant."},
+ 9:{title:"Composition on your {body}",body:"Enable the <b>grid lines</b> (MENU → Grid Line → Rule of 3rds) for thirds/headroom practice. Your single {ff}mm-equiv focal length has a fixed 'compression' look — learn its personality: how close you stand changes the feel more than any setting."},
+ 10:{title:"Audio into your {body}",body:"The {body} has a <b>3.5mm mic input</b> (no headphone jack, so monitor on playback). A cheap on-camera or lav mic plugged in beats the internal mic massively. Set <b>Audio Rec Level</b> manually in MENU so dialogue peaks around -12dB, not clipping."},
+ 11:{title:"Pre-pro: your {body} kit checklist",body:"Plan around your real kit: one {ff}mm-equiv prime means scout whether you can physically get the framings you storyboarded. Pack <b>spare batteries</b> (the {body} eats them — get 2–3 third-party ones), fast SD cards, your <b>ND filter</b> for daylight, and a mic. Set <b>24p + 1/50 + your ND</b> as your daylight baseline."},
+ 12:{title:"Shoot day on your {body}",body:"Before every take: confirm <b>focus</b> (peaking + punch-in with the center button), <b>exposure</b> (histogram via DISP), and <b>audio level</b>. Keep <b>Eye AF</b> on for actors. Watch battery — swap before it dies mid-take."},
+ 13:{title:"Pickups with your prime",body:"Inserts and cutaways are where your <b>f/{a}</b> prime shines — get close, go shallow, grab detail shots (hands, objects, textures). These buy you editing flexibility and look expensive for free."},
+ 15:{title:"Studying shorts as a {body} shooter",body:"As you watch winners, notice which looks you can achieve with a single fast prime on APS-C — a LOT of festival shorts are shot on exactly this kind of minimal kit. Constraint isn't holding you back; it's the same gear plenty of selected films used."},
+};
+
+function gearTip(idx){
+ const g=state.gear||DEFAULT_GEAR;
+ const tip=GEAR_TIPS[idx]; if(!tip) return null;
+ const ff=Math.round(g.focal*(g.crop||1.5));
+ const oss = g.hasOSS ? "Your lens has OSS (optical stabilization) — turn it ON for handheld, OFF on a tripod." : "Your prime has no stabilization either, so a small tripod or a steady surface is your friend for static shots.";
+ const fill=s=>s.replace(/\{body\}/g,esc(g.body)).replace(/\{f\}/g,g.focal).replace(/\{ff\}/g,ff).replace(/\{a\}/g,g.aperture).replace(/\{oss\}/g,oss);
+ return {title:fill(tip.title), body:fill(tip.body)};
+}
+
+/* ============ STATE + SYNC ============ */
+let state={done:{},current:0,targets:[],log:[],films:0,gear:{...DEFAULT_GEAR}};
+let sb=null, cfg={url:'',key:'',user:''};
+const FLAT=[]; CURRICULUM.forEach((p,pi)=>p.weeks.forEach((w,wi)=>FLAT.push({...w,phase:p.phase,pi,wi,idx:FLAT.length})));
+const TOTAL=FLAT.length;
+
+/* Pre-filtered FilmFreeway searches — stable URLs, NOT deadline data. */
+const QUICKLINKS=[
+ {label:"Short films", url:"https://filmfreeway.com/festivals?q=short+film"},
+ {label:"Comedy shorts", url:"https://filmfreeway.com/festivals?q=comedy+short"},
+ {label:"Music video", url:"https://filmfreeway.com/festivals?q=music+video"},
+ {label:"Student / emerging", url:"https://filmfreeway.com/festivals?q=student+short"},
+ {label:"No / low entry fee", url:"https://filmfreeway.com/festivals?completion_status=&entry_fee=0"},
+ {label:"Browse all festivals", url:"https://filmfreeway.com/festivals"},
+];
+let trackerFilter='all'; // all | active | submitted
+
+function loadCfg(){ try{ const c=JSON.parse(localStorage.getItem('frameone:cfg')||'{}'); cfg={url:c.url||'',key:c.key||'',user:c.user||''}; }catch(e){} }
+function loadLocal(){ try{ const s=JSON.parse(localStorage.getItem('frameone:state')||'null'); if(s) state=s; }catch(e){} normalize(); }
+function normalize(){ if(!state.log)state.log=[]; if(!state.targets)state.targets=[]; state.targets.forEach(t=>{ if(!t.status)t.status='researching'; }); if(!state.done)state.done={}; if(typeof state.current!=='number')state.current=0; if(typeof state.films!=='number')state.films=0; if(!state.gear)state.gear={...DEFAULT_GEAR}; }
+function saveLocal(){ localStorage.setItem('frameone:state',JSON.stringify(state)); }
+
+function initSupabase(){
+  if(cfg.url && cfg.key && window.supabase){
+    try{ sb=window.supabase.createClient(cfg.url,cfg.key); return true; }catch(e){ console.warn(e); }
+  }
+  return false;
+}
+async function pullCloud(){
+  if(!sb||!cfg.user) return false;
+  try{
+    const {data,error}=await sb.from('frameone_state').select('payload').eq('user_key',cfg.user).maybeSingle();
+    if(error) throw error;
+    if(data&&data.payload){ state=typeof data.payload==='string'?JSON.parse(data.payload):data.payload; normalize(); saveLocal(); }
+    setSync('ok'); return true;
+  }catch(e){ console.warn('pull failed',e); setSync('err'); return false; }
+}
+async function pushCloud(){
+  saveLocal();
+  if(!sb||!cfg.user){ setSync('local'); return; }
+  try{
+    const {error}=await sb.from('frameone_state').upsert({user_key:cfg.user,payload:state,updated_at:new Date().toISOString()},{onConflict:'user_key'});
+    if(error) throw error; setSync('ok');
+  }catch(e){ console.warn('push failed',e); setSync('err'); }
+}
+function setSync(s){
+  const d=document.getElementById('syncDot');
+  d.className='syncdot '+(s==='ok'?'ok':s==='local'?'local':s==='err'?'err':'');
+  d.title = s==='ok'?'Synced to cloud':s==='local'?'This device only — tap to set up sync':s==='err'?'Sync error — tap to fix':'Not configured — tap to set up sync';
+}
+
+async function boot(){
+  loadCfg(); loadLocal();
+  if(initSupabase()){ await pullCloud(); } else { setSync(cfg.url?'err':'local'); }
+  render();
+}
+
+/* config modal */
+function openConfig(){
+  document.getElementById('cfgUrl').value=cfg.url;
+  document.getElementById('cfgKey').value=cfg.key;
+  document.getElementById('cfgUser').value=cfg.user;
+  document.getElementById('configBg').classList.add('show');
+}
+async function saveConfig(){
+  cfg.url=document.getElementById('cfgUrl').value.trim().replace(/\/$/,'');
+  cfg.key=document.getElementById('cfgKey').value.trim();
+  cfg.user=document.getElementById('cfgUser').value.trim();
+  localStorage.setItem('frameone:cfg',JSON.stringify(cfg));
+  document.getElementById('configBg').classList.remove('show');
+  if(initSupabase()){
+    // pull existing cloud state; if none, push current local up
+    const {data}=await sb.from('frameone_state').select('payload').eq('user_key',cfg.user).maybeSingle().catch(()=>({}));
+    if(data&&data.payload){ await pullCloud(); toast('Synced! Pulled your progress from the cloud.'); }
+    else { await pushCloud(); toast('Synced! This device is now the source — open the same code elsewhere.'); }
+    render();
+  } else { setSync('local'); toast('Saved locally. Add Supabase keys to sync across devices.'); }
+}
+
+/* ============ RENDER ============ */
+function render(){ renderNow();renderMap();renderTargets();renderFests();renderGear();renderLog();document.getElementById('streakN').textContent=countShipped(); }
+function countShipped(){ return Object.keys(state.done).length; }
+function renderNow(){
+  const el=document.getElementById('now');
+  if(state.current>=TOTAL){ el.innerHTML=`<div class="now"><div class="tag">Course Complete</div><h2>You finished. Now you just... keep going.</h2><p>You ran all 20 weeks. The point was becoming someone who plans, shoots, finishes, and releases on a loop. Go to the Festival Board, pin your next deadline, and start project #2.</p><div class="actions"><button class="btn primary" onclick="go('fest')">Pin next target →</button></div></div>`; return; }
+  const w=FLAT[state.current];
+  const lessons=w.lessons.map(l=>`<li><span class="dot">▸</span><span>${l}</span></li>`).join('');
+  const gt=gearTip(state.current);
+  const gearBlock = gt ? `<div class="gearcall"><div class="gc-lab">🎥 ${gt.title}</div><p>${gt.body}</p><button class="gc-edit" onclick="go('gear')">edit my gear →</button></div>` : '';
+  el.innerHTML=`<div class="now"><div class="tag">This Week · Phase ${w.pi+1} of 5 · Week ${state.current+1} of ${TOTAL}</div><h2>${w.t}</h2><div class="phase">${w.phase.toUpperCase()} — ${CURRICULUM[w.pi].sub}</div><div class="countdown"><span>⏳</span><span>Suggested deadline: <b>7 days</b> from when you start</span></div><div class="lesson-block"><h3>Learn / Do</h3><ul class="tasks">${lessons}</ul></div>${gearBlock}<div class="deliverable"><div class="lab">▶ Ship this — the deadline assignment</div><p>${w.deliver}</p></div><div class="actions"><button class="btn primary" onclick="openComplete()">I shipped it ✓</button><button class="btn ghost" onclick="pause()">Life happened — pause this week</button><button class="btn ghost" onclick="go('map')">See full path</button></div></div>`;
+}
+function renderMap(){
+  document.getElementById('phaseList').innerHTML=CURRICULUM.map((p,pi)=>{
+    const weeksHtml=p.weeks.map((w,wi)=>{
+      const idx=FLAT.find(f=>f.pi===pi&&f.wi===wi).idx;
+      const isDone=state.done[idx],isCurrent=idx===state.current;
+      const chip=isDone?`<span class="chip done">shipped ✓</span>`:isCurrent?`<span class="chip current">current</span>`:`<span class="chip locked">locked</span>`;
+      const jump=(isDone||isCurrent)?`<button class="jump" onclick="goWeek(${idx})">open</button>`:'';
+      return `<div class="wk ${isDone?'done':''}"><div class="wk-t"><b>Week ${idx+1}</b>${w.t}</div><div style="display:flex;gap:10px;align-items:center">${chip}${jump}</div></div>`;
+    }).join('');
+    const phaseDone=p.weeks.filter((w,wi)=>state.done[FLAT.find(f=>f.pi===pi&&f.wi===wi).idx]).length;
+    return `<div class="phase-card"><div class="ph-head" onclick="this.nextElementSibling.classList.toggle('open')"><div style="display:flex;align-items:center;gap:18px"><div class="ph-num">${pi+1}</div><div class="ph-info"><h4>${p.phase}</h4><span>${p.sub.toUpperCase()}</span></div></div><div class="ph-prog">${phaseDone}/${p.weeks.length}</div></div><div class="weeks ${pi===FLAT[Math.min(state.current,TOTAL-1)]?.pi?'open':''}">${weeksHtml}</div></div>`;
+  }).join('');
+}
+function renderTargets(){
+  // quick browse links
+  const ql=document.getElementById('quickLinks');
+  if(ql) ql.innerHTML=QUICKLINKS.map(l=>`<a href="${l.url}" target="_blank" rel="noopener">${l.label} ↗</a>`).join('');
+
+  const host=document.getElementById('myTargets');
+  const ctrl=document.getElementById('trackerControls');
+  const targets=state.targets||[];
+  if(!targets.length){
+    if(ctrl) ctrl.innerHTML='';
+    host.innerHTML=`<div class="empty">No festivals pinned yet. Hit a quick-browse link above, find one taking shorts, and pin it with its real deadline. A date on the calendar does more than motivation ever will.</div>`;
+    return;
+  }
+  // controls: filter buttons + fee total
+  const activeCount=targets.filter(t=>!['submitted','accepted','rejected'].includes(t.status)).length;
+  const submittedCount=targets.filter(t=>['submitted','accepted','rejected'].includes(t.status)).length;
+  const feeTotal=targets.filter(t=>['planned','submitted','accepted'].includes(t.status)||t.status==='researching').reduce((s,t)=>s+(parseFloat(t.fee)||0),0);
+  if(ctrl) ctrl.innerHTML=`<div class="tc-filter">
+      <button class="${trackerFilter==='all'?'on':''}" onclick="setFilter('all')">All (${targets.length})</button>
+      <button class="${trackerFilter==='active'?'on':''}" onclick="setFilter('active')">Active (${activeCount})</button>
+      <button class="${trackerFilter==='submitted'?'on':''}" onclick="setFilter('submitted')">Submitted (${submittedCount})</button>
+    </div>
+    <div class="tc-total">Est. fees: <b>$${feeTotal.toFixed(2)}</b></div>`;
+
+  // sort by soonest deadline (no-date sinks to bottom), then filter
+  const rows=targets.map((t,i)=>({...t,_i:i}))
+    .filter(t=>{
+      if(trackerFilter==='active') return !['submitted','accepted','rejected'].includes(t.status);
+      if(trackerFilter==='submitted') return ['submitted','accepted','rejected'].includes(t.status);
+      return true;
+    })
+    .sort((a,b)=>{
+      const da=a.date?new Date(a.date).getTime():Infinity, db=b.date?new Date(b.date).getTime():Infinity;
+      return da-db;
+    });
+
+  if(!rows.length){ host.innerHTML=`<div class="empty">Nothing in this filter.</div>`; return; }
+
+  const STATUS=[['researching','Researching'],['planned','Planning to submit'],['submitted','Submitted'],['accepted','Accepted'],['rejected','Rejected']];
+  host.innerHTML=rows.map(t=>{
+    const i=t._i;
+    const days=daysUntil(t.date), urgent=days!==null&&days<=21&&!['submitted','accepted','rejected'].includes(t.status);
+    const cd=days===null?'no deadline':days<0?`closed ${-days}d ago`:days===0?'TODAY':`${days} days left`;
+    const feeNum=parseFloat(t.fee);
+    const feeTag = (!isNaN(feeNum)&&feeNum>0)?`<span class="mt-tag">$${feeNum.toFixed(2)}</span>`:`<span class="mt-tag free">FREE</span>`;
+    const catTag = t.cat?`<span class="mt-tag">${esc(t.cat)}</span>`:'';
+    const linkBit = t.link?(/^https?:\/\//i.test(t.link)?`<a href="${esc(t.link)}" target="_blank" rel="noopener">listing ↗</a>`:esc(t.link)):'';
+    const opts=STATUS.map(([v,l])=>`<option value="${v}" ${t.status===v?'selected':''}>${l}</option>`).join('');
+    return `<div class="my-target st-${t.status||'researching'}">
+      <div class="mt-info">
+        <b>${esc(t.name)}</b>
+        <span class="mt-sub">${t.date?fmtDate(t.date):'no deadline set'}${linkBit?' · '+linkBit:''}</span>
+        <div class="mt-tags">${feeTag}${catTag}</div>
+      </div>
+      <div class="mt-right">
+        <span class="mt-cd ${urgent?'urgent':''}">${cd}</span>
+        <select class="mt-status" onchange="setStatus(${i},this.value)">${opts}</select>
+        <button class="mt-rm" onclick="rmTarget(${i})">remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function setFilter(f){ trackerFilter=f; renderTargets(); }
+async function setStatus(i,v){
+  if(!state.targets[i]) return;
+  state.targets[i].status=v;
+  if(v==='submitted'){ state.log.push({date:fmtNow(),text:`Submitted to ${state.targets[i].name} 🎬`,note:''}); }
+  if(v==='accepted'){ state.log.push({date:fmtNow(),text:`ACCEPTED to ${state.targets[i].name}! 🏆`,note:''}); }
+  render(); await pushCloud();
+}
+function renderFests(){ document.getElementById('festGrid').innerHTML=FESTS.map(f=>`<div class="fest"><div class="tier ${f.tier}">${f.tier==='entry'?'start here':f.tier==='mid'?'next step':'reach'}</div><h5>${f.n}</h5><div class="meta">${f.meta}</div><div class="desc">${f.desc}</div><div class="ddl">📅 ${f.ddl}</div><div style="margin-top:10px"><a href="${f.url}" target="_blank" rel="noopener">${f.url.replace('https://','')} ↗</a></div></div>`).join(''); }
+function renderGear(){
+  const g=state.gear||DEFAULT_GEAR;
+  const set=(id,v)=>{const e=document.getElementById(id); if(e&&document.activeElement!==e) e.value=v;};
+  set('gBody',g.body); set('gCrop',String(g.crop||1.5)); set('gFocal',g.focal); set('gAp',g.aperture);
+  set('gOSS',String(!!g.hasOSS)); set('gND',String(!!g.nd));
+  const ff=Math.round((g.focal||35)*(g.crop||1.5));
+  document.getElementById('gearPreview').innerHTML=`<b>Your setup:</b> ${esc(g.body)} · ${g.focal}mm f/${g.aperture} prime${g.nd?' + ND filter':''}.<br>On this body that ${g.focal}mm frames like a <b>~${ff}mm</b> lens (${g.crop}× crop). The weekly camera callouts now speak to exactly this kit.`;
+}
+async function saveGear(){
+  const num=(id,def)=>{const v=parseFloat(document.getElementById(id).value); return isNaN(v)?def:v;};
+  state.gear={
+    body:document.getElementById('gBody').value.trim()||'Sony a6400',
+    crop:num('gCrop',1.5),
+    focal:num('gFocal',35),
+    aperture:num('gAp',1.8),
+    hasOSS:document.getElementById('gOSS').value==='true',
+    nd:document.getElementById('gND').value==='true'
+  };
+  render(); toast('Gear saved — weekly callouts now tailored to it. 🎥'); await pushCloud();
+}
+function renderLog(){
+  document.getElementById('sWeeks').textContent=countShipped();
+  document.getElementById('sPct').textContent=Math.round(countShipped()/TOTAL*100)+'%';
+  document.getElementById('sFilms').textContent=state.films;
+  document.getElementById('sTargets').textContent=state.targets.length;
+  const host=document.getElementById('logList');
+  if(!state.log.length){ host.innerHTML=`<div class="empty">Nothing shipped yet. The first entry is the hardest. Go to This Week.</div>`; return; }
+  host.innerHTML=[...state.log].reverse().map(e=>`<div class="logitem"><div class="lt">${e.date}</div><div class="lc">${esc(e.text)}${e.note?` — <i style="color:var(--muted)">"${esc(e.note)}"</i>`:''}</div></div>`).join('');
+}
+
+/* ============ ACTIONS ============ */
+function openComplete(){ const w=FLAT[state.current]; document.getElementById('mTitle').textContent='Ship: '+w.t; document.getElementById('mBody').textContent='Marking this shipped advances you to the next week. Deliverable was: '+w.deliver; document.getElementById('mNote').value=''; document.getElementById('modalBg').classList.add('show'); }
+function closeModal(){ document.getElementById('modalBg').classList.remove('show'); }
+async function confirmComplete(){ const w=FLAT[state.current],note=document.getElementById('mNote').value.trim(); state.done[state.current]=true; if(/shoot|film|edit|short|footage|cut|export|clip/i.test(w.deliver)) state.films++; state.log.push({date:fmtNow(),text:`Shipped Week ${state.current+1}: ${w.t}`,note}); state.current++; closeModal(); render(); toast('Shipped. Onto the next. 🎬'); await pushCloud(); }
+async function pause(){ state.log.push({date:fmtNow(),text:`Paused Week ${state.current+1} — life happened. No penalty.`,note:''}); render(); go('log'); toast('Paused. Deadline rolls forward.'); await pushCloud(); }
+async function goWeek(idx){ if(idx<=state.current){ state.current=idx; render(); go('now'); await pushCloud(); } }
+async function addTarget(){
+  const g=id=>document.getElementById(id);
+  const n=g('tName').value.trim(), d=g('tDate').value;
+  if(!n){ toast('Give the festival a name first.'); return; }
+  state.targets.push({
+    name:n, date:d,
+    fee:g('tFee').value.trim(),
+    cat:g('tCat').value,
+    link:g('tLink').value.trim(),
+    status:g('tStatus').value||'researching'
+  });
+  state.log.push({date:fmtNow(),text:`Pinned festival: ${n}${d?' (due '+fmtDate(d)+')':''}`,note:''});
+  ['tName','tDate','tFee','tLink'].forEach(id=>g(id).value='');
+  g('tCat').value=''; g('tStatus').value='researching';
+  render(); toast('Pinned. Now make something for it.'); await pushCloud();
+}
+async function rmTarget(i){ state.targets.splice(i,1); render(); await pushCloud(); }
+
+/* ============ NAV + UTIL ============ */
+function go(v){ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.v===v)); document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active',s.id===v)); window.scrollTo({top:0,behavior:'smooth'}); }
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function daysUntil(d){ if(!d)return null; const t=new Date(d+'T00:00:00'),n=new Date(); n.setHours(0,0,0,0); return Math.round((t-n)/864e5); }
+function fmtDate(d){ return new Date(d+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }
+function fmtNow(){ return new Date().toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }
+
+/* ============ PWA ============ */
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredPrompt=e; const bar=document.getElementById('installBar'); bar.classList.add('show'); document.getElementById('installBtn').onclick=async()=>{ bar.classList.remove('show'); deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; }; });
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+
+boot();
+</script>
+</body>
+</html>
