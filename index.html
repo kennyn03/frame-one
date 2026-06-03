@@ -420,9 +420,15 @@ function loadLocal(){ try{ const s=JSON.parse(localStorage.getItem('frameone:sta
 function normalize(){ if(!state.log)state.log=[]; if(!state.targets)state.targets=[]; state.targets.forEach(t=>{ if(!t.status)t.status='researching'; }); if(!state.done)state.done={}; if(typeof state.current!=='number')state.current=0; if(typeof state.films!=='number')state.films=0; if(!state.gear)state.gear={...DEFAULT_GEAR}; }
 function saveLocal(){ localStorage.setItem('frameone:state',JSON.stringify(state)); }
 
+let _sbKey=null;
 function initSupabase(){
   if(cfg.url && cfg.key && window.supabase){
-    try{ sb=window.supabase.createClient(cfg.url,cfg.key); return true; }catch(e){ console.warn(e); }
+    const k=cfg.url+'|'+cfg.key;
+    if(sb && _sbKey===k) return true; // reuse existing client
+    try{
+      sb=window.supabase.createClient(cfg.url,cfg.key,{auth:{persistSession:false,autoRefreshToken:false}});
+      _sbKey=k; return true;
+    }catch(e){ console.warn(e); }
   }
   return false;
 }
@@ -469,10 +475,16 @@ async function saveConfig(){
   localStorage.setItem('frameone:cfg',JSON.stringify(cfg));
   document.getElementById('configBg').classList.remove('show');
   if(initSupabase()){
-    // pull existing cloud state; if none, push current local up
-    const {data}=await sb.from('frameone_state').select('payload').eq('user_key',cfg.user).maybeSingle().catch(()=>({}));
-    if(data&&data.payload){ await pullCloud(); toast('Synced! Pulled your progress from the cloud.'); }
-    else { await pushCloud(); toast('Synced! This device is now the source — open the same code elsewhere.'); }
+    try{
+      // pull existing cloud state; if none, push current local up
+      const {data,error}=await sb.from('frameone_state').select('payload').eq('user_key',cfg.user).maybeSingle();
+      if(error) throw error;
+      if(data&&data.payload){ await pullCloud(); toast('Synced! Pulled your progress from the cloud.'); }
+      else { await pushCloud(); toast('Synced! This device is now the source — open the same code elsewhere.'); }
+    }catch(e){
+      console.warn('sync setup failed',e); setSync('err');
+      toast('Connected, but sync failed — check the table & keys (see console).');
+    }
     render();
   } else { setSync('local'); toast('Saved locally. Add Supabase keys to sync across devices.'); }
 }
